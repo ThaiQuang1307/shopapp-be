@@ -9,5 +9,5 @@ public interface IUserService {
     UserModel createUser(UserDTO userDTO) throws DataNotFoundException;
 
     // dang nhap
-    String login(String phoneNumber, String password);
+    String login(String phoneNumber, String password) throws Exception;
 }
