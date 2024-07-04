@@ -12,6 +12,7 @@ import com.project.shopapp.responses.OrderDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class OrderDetailService implements IOrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
 
     @Override
+    @Transactional
     public OrderDetailResponse createOrderDetail(OrderDetailDTO orderDetailDTO) throws Exception {
         // kiểm tra xem order có tồn tại hay ko
         OrderModel existingOrder = orderRepository
@@ -58,6 +60,7 @@ public class OrderDetailService implements IOrderDetailService {
     }
 
     @Override
+    @Transactional
     public OrderDetailModel updateOrderDetail(
             Long orderDetailId,
             OrderDetailDTO orderDetailDTO
@@ -89,6 +92,7 @@ public class OrderDetailService implements IOrderDetailService {
     }
 
     @Override
+    @Transactional
     public void deleteOrderDetail(Long orderDetailId) throws Exception {
         orderDetailRepository.deleteById(orderDetailId);
     }

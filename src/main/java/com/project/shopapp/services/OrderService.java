@@ -11,6 +11,7 @@ import com.project.shopapp.responses.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -24,6 +25,7 @@ public class OrderService implements IOrderService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public OrderResponse createOrder(OrderDTO orderDTO) throws Exception {
         // kiểm tra user_id có tồn tại không
         UserModel user = userRepository
@@ -73,6 +75,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    @Transactional
     public OrderModel updateOrder(Long orderId, OrderDTO orderDTO) throws Exception {
         OrderModel existingOrder = orderRepository
                 .findById(orderId)
@@ -90,6 +93,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    @Transactional
     public void deleteOrder(Long orderId) throws Exception {
         OrderModel existingOrder = orderRepository
                 .findById(orderId)
