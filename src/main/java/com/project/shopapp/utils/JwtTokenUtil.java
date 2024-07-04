@@ -1,4 +1,4 @@
-package com.project.shopapp.components;
+package com.project.shopapp.utils;
 
 import com.project.shopapp.exceptions.InvalidParamException;
 import com.project.shopapp.models.UserModel;

@@ -9,5 +9,5 @@ public interface IUserService {
     UserModel createUser(UserDTO userDTO) throws Exception;
 
     // dang nhap
-    String login(String phoneNumber, String password) throws Exception;
+    String login(String phoneNumber, String password, Long roleId) throws Exception;
 }

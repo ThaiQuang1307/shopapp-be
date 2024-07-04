@@ -10,6 +10,7 @@ import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.services.IProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -118,6 +119,21 @@ public class ProductController {
             return ResponseEntity.ok().body(productImages);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<?> viewImage(@PathVariable String imageName) {
+        try {
+            Path imagePath = Paths.get("upload/" + imageName);
+            UrlResource resource = new UrlResource(imagePath.toUri());
+            if(resource.exists()){
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
+            }else{
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e){
+            return ResponseEntity.notFound().build();
         }
     }
 

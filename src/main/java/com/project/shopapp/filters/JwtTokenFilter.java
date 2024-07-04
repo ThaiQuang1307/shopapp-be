@@ -1,6 +1,6 @@
 package com.project.shopapp.filters;
 
-import com.project.shopapp.components.JwtTokenUtil;
+import com.project.shopapp.utils.JwtTokenUtil;
 import com.project.shopapp.models.UserModel;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -74,7 +73,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of(apiPrefix + "/products", "GET"),
                 Pair.of(apiPrefix + "/categories", "GET"),
                 Pair.of(apiPrefix + "/users/register", "POST"),
-                Pair.of(apiPrefix + "/users/login", "POST")
+                Pair.of(apiPrefix + "/users/login", "POST"),
+                Pair.of(apiPrefix + "/roles", "GET")
         );
         for (Pair<String, String> byPassToken : byPassTokens) {
             if (request.getServletPath().contains(byPassToken.getFirst())

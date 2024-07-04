@@ -1,7 +1,6 @@
 package com.project.shopapp.services;
 
-import com.project.shopapp.components.JwtTokenUtil;
-import com.project.shopapp.configurations.SecurityConfig;
+import com.project.shopapp.utils.JwtTokenUtil;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
@@ -9,12 +8,13 @@ import com.project.shopapp.models.RoleModel;
 import com.project.shopapp.models.UserModel;
 import com.project.shopapp.repositories.RoleRepository;
 import com.project.shopapp.repositories.UserRepository;
+import com.project.shopapp.utils.LocalizationUtil;
+import com.project.shopapp.utils.MessageKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +28,7 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
+    private final LocalizationUtil localizationUtil;
 //    private final SecurityConfig securityConfig;
 
     @Override
@@ -40,7 +41,7 @@ public class UserService implements IUserService {
         }
         RoleModel role = roleRepository.findById(userDTO.getRoleId())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
-        if (role.getName().toUpperCase().equals(RoleModel.ADMIN)){
+        if (role.getName().toUpperCase().equals(RoleModel.ADMIN)) {
             throw new PermissionDenyException("You cannot register an admin account");
         }
         // convert UserFTO => UserModel
@@ -65,18 +66,27 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public String login(String phoneNumber, String password) throws Exception {
+    public String login(String phoneNumber, String password, Long roleId) throws Exception {
         Optional<UserModel> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
-        if (optionalUser.isEmpty()){
-            throw new DataNotFoundException("Invalid phone number or password");
+        if (optionalUser.isEmpty()) {
+            throw new DataNotFoundException(localizationUtil.getLocalizedMessage(
+                    MessageKey.LOGIN_FAILED_INVALID));
         }
 
-        UserModel existingUser =optionalUser.get();
+        UserModel existingUser = optionalUser.get();
         // check password
         if (existingUser.getFacebookAccountId() == 0 && existingUser.getGoogleAccountId() == 0) {
-            if (!passwordEncoder.matches(password, existingUser.getPassword())){
-                throw new BadCredentialsException("Wrong phone number or password");
+            if (!passwordEncoder.matches(password, existingUser.getPassword())) {
+                throw new BadCredentialsException(localizationUtil.getLocalizedMessage(
+                        MessageKey.LOGIN_FAILED_INVALID));
             }
+        }
+
+        // check role
+        Optional<RoleModel> optionalRole = roleRepository.findById(roleId);
+        if(optionalRole.isEmpty() || !roleId.equals(existingUser.getRoleModel().getId())){
+            throw  new DataNotFoundException(localizationUtil.getLocalizedMessage(
+                    MessageKey.LOGIN_FAILED_ROLE));
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

@@ -37,7 +37,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(requests -> {
                     requests.requestMatchers(
                                     String.format("%s/users/register", apiPrefix),
-                                    String.format("%s/users/login", apiPrefix)
+                                    String.format("%s/users/login", apiPrefix),
+                                    String.format("%s/roles", apiPrefix)
                             )
                             .permitAll()
                             // category
@@ -58,9 +59,11 @@ public class WebSecurityConfig {
 
                             // product
                             .requestMatchers(HttpMethod.GET,
-                                    String.format("%s/products**", apiPrefix)).hasAnyRole(RoleModel.USER, RoleModel.ADMIN)
+                                    String.format("%s/products**", apiPrefix)).permitAll()
                             .requestMatchers(HttpMethod.GET,
-                                    String.format("%s/products/**", apiPrefix)).hasAnyRole(RoleModel.USER, RoleModel.ADMIN)
+                                    String.format("%s/products/**", apiPrefix)).permitAll()
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/products/images/*", apiPrefix)).permitAll()
                             .requestMatchers(HttpMethod.POST,
                                     String.format("%s/products", apiPrefix)).hasRole(RoleModel.ADMIN)
                             .requestMatchers(HttpMethod.PUT,
