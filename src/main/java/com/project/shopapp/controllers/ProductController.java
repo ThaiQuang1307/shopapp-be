@@ -29,8 +29,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("${api.prefix}/products")
@@ -41,11 +43,17 @@ public class ProductController {
     // lấy danh sách sản phẩm
     @GetMapping("")
     public ResponseEntity<BaseListResponse<ProductResponse>> getProducts(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0", name = "category_id") Long categoryId
     ) {
-        PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-        Page<ProductResponse> productPage = productService.getProducts(pageRequest);
+        PageRequest pageRequest = PageRequest.of(
+                page, limit,
+                Sort.by("createdAt").descending()
+//                Sort.by("createdAt").ascending()
+        );
+        Page<ProductResponse> productPage = productService.getProducts(keyword, categoryId,pageRequest);
         // tổng số trang
         int totalPage = productPage.getTotalPages();
         List<ProductResponse> products = productPage.getContent();
@@ -57,8 +65,9 @@ public class ProductController {
 //        );
 //        return ResponseEntity.ok(BaseListResponse.<ProductResponse>builder().dataList(products).totalPage(totalPage).build());
         return ResponseEntity.ok(
-                new BaseListResponse<ProductResponse>().setDataList(products).setTotalPage(totalPage)
-        );
+                new BaseListResponse<ProductResponse>()
+                        .setDataList(products)
+                        .setTotalPage(totalPage));
     }
 
     // lấy chi tiết sản phẩm
@@ -130,7 +139,10 @@ public class ProductController {
             if(resource.exists()){
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
             }else{
-                return ResponseEntity.notFound().build();
+//                return ResponseEntity.notFound().build();
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(
+                        new UrlResource(Paths.get("upload/notfound-image.jpg").toUri())
+                );
             }
         } catch (Exception e){
             return ResponseEntity.notFound().build();
@@ -181,6 +193,20 @@ public class ProductController {
             productService.deleteProduct(id);
             return ResponseEntity.status(HttpStatus.OK).body("This is delete product with id = " + id);
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/by-ids")
+    public ResponseEntity<?> getProductsByIds(@RequestParam("ids") String ids){
+        try {
+            // tách chuỗi ids thành mảng số nguyên
+            List<Long> productIds = Arrays.stream(ids.split(","))
+                    .map(Long::parseLong)
+                    .toList();
+            List<ProductResponse> products = productService.findProductsByIds(productIds);
+            return ResponseEntity.ok(products);
+        }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

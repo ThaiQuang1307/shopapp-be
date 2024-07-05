@@ -39,8 +39,8 @@ public class CategoryController {
     //Hiển thị tất cả các category
     @GetMapping("") // api/v1/categories?page=1&limit=10
     public ResponseEntity<List<CategoryModel>> getCategories(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit
+//            @RequestParam("page") int page,
+//            @RequestParam("limit") int limit
     ) {
         List<CategoryModel> categories = categoryService.getCategories();
         return ResponseEntity.ok(categories);

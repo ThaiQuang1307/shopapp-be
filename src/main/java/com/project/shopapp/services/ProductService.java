@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -52,10 +53,9 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public Page<ProductResponse> getProducts(PageRequest pageRequest) {
-        return productRepository
-                .findAll(pageRequest)
-                .map(ProductResponse::fromProductModel);
+    public Page<ProductResponse> getProducts(String keyword, Long categoryId, PageRequest pageRequest) {
+        Page<ProductModel> productsPage = productRepository.searchProducts(categoryId, keyword, pageRequest);
+        return productsPage.map(ProductResponse::fromProductModel);
     }
 
     @Override
@@ -115,4 +115,13 @@ public class ProductService implements IProductService {
         }
         return productImageRepository.save(newProductImage);
     }
+
+    // lấy danh sách sản phẩm theo danh sách product id
+    @Override
+    public List<ProductResponse> findProductsByIds(List<Long> productIds) throws Exception {
+        List<ProductModel> productModels = productRepository.findProductsByIds(productIds);
+
+        return productModels.stream().map(ProductResponse::fromProductModel).toList();
+    }
+
 }
